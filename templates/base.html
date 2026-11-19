@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="h-full bg-surface" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}StudioGest - Gestión para Barberías & Peluquerías{% endblock %}</title>
+
+  <meta name="theme-color" content="#101929"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/branding/favicon-32.png' %}"/>
+  <link rel="icon" type="image/png" sizes="64x64" href="{% static 'img/branding/favicon-64.png' %}"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="{% static 'img/branding/icon-512.png' %}"/>
+  <link rel="apple-touch-icon" sizes="192x192" href="{% static 'img/branding/apple-touch-icon.png' %}"/>
+  <link rel="stylesheet" href="{% static 'css/tailwind.out.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/branding.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}"/>
+
+  <!-- Lato: tipografía de interfaz de la guía de marca -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet"/>
+
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c6c6cd;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #76777d;
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-surface text-on-surface antialiased font-sans flex flex-col selection:bg-secondary selection:text-white">
+
+  {% block full_page %}
+    <!-- Layout Estándar de la Aplicación -->
+    {% include 'includes/messages.html' %}
+
+    <div class="studio-app min-h-screen flex flex-row">
+      <!-- Menú lateral fijo de escritorio -->
+      {% include 'includes/sidebar.html' %}
+
+      <!-- Contenedor principal con margen en escritorio -->
+      <div class="w-full lg:w-[calc(100%-260px)] lg:ml-[260px] min-h-screen flex flex-col bg-surface pb-20 lg:pb-8">
+        <!-- Barra superior -->
+        {% include 'includes/topbar.html' %}
+
+        <!-- Lienzo de Contenido -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1440px] w-full mx-auto space-y-6">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <!-- Barra de navegación inferior para móvil -->
+    {% include 'includes/bottom_nav.html' %}
+    {% include 'includes/mobile_menu.html' %}
+    {% include 'includes/notifications.html' %}
+  {% endblock %}
+
+  <!-- Diálogos Modales -->
+  {% block modal %}{% endblock %}
+
+  <!-- Scripts Adicionales -->
+  <script src="{% static 'js/navigation.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

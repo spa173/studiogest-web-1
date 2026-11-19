@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - StudioGest{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+  <div class="dashboard-heading">
+    <h1 class="font-headline">¡Hola, {{ request.user.first_name|default:request.user.username }}!</h1>
+  </div>
+
+  <dl class="dashboard-kpis{% if not can_view_financial_dashboard %} dashboard-kpis-operational{% endif %}">
+    {% if can_view_financial_dashboard %}
+    <div class="dashboard-kpi">
+      <dt>Servicios atendidos</dt><dd>{{ total_sales_formatted }}<span>Importe de citas completadas</span></dd>
+    </div>
+    {% endif %}
+    <div class="dashboard-kpi">
+      <dt>Citas de hoy</dt><dd>{{ today_count }}<span>{{ completed_count }} completadas</span></dd>
+    </div>
+    <div class="dashboard-kpi">
+      <dt>Clientes registrados</dt><dd>{{ total_customers }}<span><a href="{% url 'customers:list' %}" class="dashboard-link">Ver clientes</a></span></dd>
+    </div>
+    <div class="dashboard-kpi">
+      <dt>Stock bajo</dt><dd class="text-error">{{ inventory_alerts|length }}<span>Revisar existencias</span></dd>
+    </div>
+  </dl>
+
+  <div class="dashboard-main">
+    <section class="dashboard-panel" aria-labelledby="upcoming-title">
+      <div class="dashboard-section-heading">
+        <h2 id="upcoming-title"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span> Próximas citas</h2>
+        <a href="{% url 'appointments:calendar' %}" class="dashboard-link">Ver agenda</a>
+      </div>
+      {% if can_view_financial_dashboard %}
+      <p class="dashboard-schedule-summary">Valor de citas de hoy <strong>{{ projected_sales_formatted }}</strong></p>
+      {% endif %}
+      {% if upcoming_appointments %}
+      <ul class="dashboard-appointments">
+        {% for app in upcoming_appointments %}
+        <li class="dashboard-appointment">
+          <time class="dashboard-time" datetime="{{ app.start_time|time:'H:i' }}">{{ app.start_time|time:"H:i" }}</time>
+          <div class="dashboard-appointment-info">
+            <h3>{{ app.customer.name }}{% if app.customer.is_vip %} <span class="dashboard-vip">VIP</span>{% endif %}</h3>
+            <p>{{ app.service.name }}</p>
+            <p>{{ app.professional.name }}</p>
+          </div>
+          <div class="dashboard-appointment-actions">
+            <span class="font-semibold">{{ app.price_cop_formatted }}</span>
+            {% if request.user.is_admin or app.professional.user_id == request.user.id %}
+            <form action="{% url 'appointments:complete' app.pk %}" method="POST" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="dashboard-attend">Atender</button>
+            </form>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="dashboard-empty">No hay citas pendientes hoy.</p>
+      {% endif %}
+    </section>
+
+    <div class="dashboard-aside">
+      <section class="dashboard-panel" aria-labelledby="team-title">
+        <div class="dashboard-section-heading">
+          <h2 id="team-title"><span class="material-symbols-outlined" aria-hidden="true">badge</span> Equipo activo</h2>
+          <span class="dashboard-count" aria-label="{{ professionals.count }} profesionales activos">{{ professionals.count }}</span>
+        </div>
+        <ul class="dashboard-team">
+          {% for prof in professionals %}
+          <li>
+            <span class="dashboard-avatar" aria-hidden="true">{{ prof.user.first_name|slice:":1" }}{{ prof.user.last_name|slice:":1" }}</span>
+            <div><h3>{{ prof.name }}</h3><p>{{ prof.specialty }}</p></div>
+          </li>
+          {% empty %}
+          <li class="text-on-surface-variant">No hay profesionales activos.</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="dashboard-panel" aria-labelledby="stock-title">
+        <div class="dashboard-section-heading">
+          <h2 id="stock-title"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span> Control de insumos</h2>
+          <a href="{% url 'inventory:list' %}" class="dashboard-link">Ver inventario</a>
+        </div>
+        <ul class="dashboard-list">
+          {% for item in inventory_alerts %}
+          <li class="dashboard-stock-item">
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.stock }} unidad{{ item.stock|pluralize:"es" }} · Mínimo: {{ item.min_stock }}</p>
+            <p class="{% if item.critical %}text-error{% else %}text-warning{% endif %}">{% if item.critical %}Crítico{% else %}Revisar{% endif %} · {{ item.deficit }}</p>
+          </li>
+          {% empty %}
+          <li class="dashboard-empty">No hay productos con stock bajo.</li>
+          {% endfor %}
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
